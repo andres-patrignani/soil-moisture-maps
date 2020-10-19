@@ -1,0 +1,106 @@
+body{
+    margin: 0%;
+    padding-left: 1%;
+    padding-right: 1%;
+    background-color: white;
+}
+
+nav{
+    border-bottom: #202020;
+    padding-left: 2%;
+    padding-right: 2%;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    border-bottom: 0.5px solid;
+    border-bottom-color: #555454 !important;
+}
+
+.button{
+
+    margin: 5px;
+}
+
+.research-articles{
+    margin-top: 100px;
+    margin-bottom: 100px;
+}
+.card{
+    font-size: 0.8rem;
+    border-radius: 5%;
+    box-shadow: none;
+}
+
+.card-header{
+    margin: 0%;
+    padding: 2%;
+    box-shadow: none;
+    color: orangered;
+}
+
+.card-content{
+    padding: 2%;
+}
+
+.card-footer{
+    padding: 2%;
+}
+
+article.tile{
+    padding: 1px;
+}
+
+.article{
+    margin-bottom: 100px;
+}
+
+.article-title{
+    font-size: 1rem;
+    font-weight: 500;
+    margin: none;
+    color: #202020;
+    padding-top: 5px;
+    padding-bottom: 5px;
+
+}
+
+.article-author{
+    font-size: 1rem;
+    margin-right: 20px;
+}
+
+.article-date{
+    font-size: 1rem;
+}
+
+.article-image{
+    border-image: 0.5px solid;
+}
+
+.article-text{
+    font-size: 0.9rem;
+    
+}
+
+img{
+    border-radius: 1%;
+    border-image: 5px solid;
+}
+
+figure{
+    margin: 10px !important;
+}
+
+
+.tile{
+    box-shadow: none;
+}
+
+hr{
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.nue2018{
+    color: white;
+    background-color: white;
+}
