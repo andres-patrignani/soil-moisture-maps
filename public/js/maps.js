@@ -14,7 +14,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-let mapUrl = '/maps/storage_20201017.tif'
+let mapUrl = 'maps/storage_20201017.tif'
 mapRange = [0,250];
 mapPalette = 'Spectral';
 
