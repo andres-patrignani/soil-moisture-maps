@@ -1,26 +1,116 @@
 body{
-    margin: 0px !important;
+    margin: 0px;
     padding: 0px;
-    background-color:rgba(250,250,248,255) !important;
-    font-family: 'Ubuntu', sans-serif;
 }
 
-#map {
+
+.grid-container{
+    display: grid;
+    grid-template-columns: repeat(12,1fr);
+    grid-template-rows: repeat(12,1fr);
     height: 100vh;
 }
 
-nav{
-    padding-top: 10px; 
-    padding-left: 20px;
+#map-nav {
+    grid-column: 1/3;
+    grid-row: 1/13;
+    background-color: rgb(32, 36, 61);
+    color: ivory;
+    overflow-y: auto;
 }
 
-.level-unit{
-    padding-right: 2px;
-    padding-left: 2px;
+#map{
+    grid-column: 3/13;
+    grid-row: 1/12;
+    
 }
 
-/*input[type="date"]::-webkit-calendar-picker-indicator*/
-input[type="date"]::-webkit-clear-button,
-input[type="date"]::-webkit-inner-spin-button{
-    display: none;
+#map-legend {
+    grid-column: 3/13;
+    grid-row: 12/13;
+}
+
+#map-controls{
+    padding: 20px;
+}
+
+#map-description {
+    padding-top: 50px;
+}
+
+.title {
+    margin: 0px;
+    padding-top: 20px;
+    padding-bottom: 50px;
+    font-size: 2rem;
+}
+
+
+#grid-stats{
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    grid-template-rows: repeat(6,1fr);
+    grid-gap: 10px 10px;
+}
+
+#driest-county-title {
+    grid-column: 1/3;
+    grid-row: 1;
+    padding-top: 10px;
+}
+
+#driest-county-value {
+    grid-column: 1/3;
+    grid-row: 2;
+    font-size: 2rem;
+    border-bottom: 1px solid ivory;
+}
+
+#drought-area-km-title {
+    grid-column: 1;
+    grid-row: 3;
+    padding-top: 10px;
+}
+
+#drought-area-km-value {
+    grid-column: 1;
+    grid-row: 4;
+    font-size: 2rem;
+    border-bottom: 1px solid ivory;
+}
+
+#drought-area-percent-title {
+    grid-column: 2;
+    grid-row: 3;
+    padding-top: 10px;
+}
+
+#drought-area-percent-value {
+    grid-column: 2;
+    grid-row: 4;
+    font-size: 2rem;
+    border-bottom: 1px solid ivory;
+}
+
+#population-drought-title {
+    grid-column: 1;
+    grid-row: 5;
+    padding-top: 10px;
+
+}
+
+#population-drought-value {
+    grid-column: 1;
+    grid-row: 6;
+    font-size: 2rem;
+    border-bottom: 1px solid ivory;
+}
+
+#date-btns {
+    display:grid; 
+    grid-template-columns: 1fr 4fr 1fr;
+}
+
+#date-controls {
+    padding-top: 10px;;
 }
