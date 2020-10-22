@@ -1,50 +1,231 @@
-// ADD BASEMAPS
+let metaLayers = {
+    "storage": {
+        "name": "Soil water storage",
+        "units": "mm",
+        "palette": "Spectral",
+        "textLabels": ['0','25','50','75','100','125','150','175','200','225','250'],
+        "positionLabels": [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250],
+        "colors": ['#4e78b5', '#6694c1', '#80b1cc', '#9dced6', '#c0eade', '#ffdac4', '#ffb3a7', '#fb8a8c', '#eb6574', '#d5405e'],
+        "range": [0,250],
+        "url": "maps/",
+        "filename": "storage_",
+        "extension": ".tif",
+        "description": "Soil water storage in the top 50 cm of the soil profile at 1 km spatial resolution. This map combines the output of a model with actual soil moisture observations from stations of the Kansas Mesonet."
+    },
+    "vegetation": {
+        "name": "Enhanced Vegetation Index",
+        "units": "unitless",
+        "palette": "Greens",
+        "range": [0,1],
+        "textLabels": ["0","0.1","0.2","0.3","0.4","0.5","0.6","0.7","0.8","0.9","1.0"],
+        "positionLabels": [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        "colors": ['#00a400', '#3faf2f', '#5eb94c', '#78c465', '#90ce7f', '#a7d898', '#bee2b1', '#d4eccb', '#e9f5e5', '#ffffff'],
+        "url": "maps/",
+        "filename": "evi2_16_day_",
+        "extension": ".tif",
+        "description": "Two-band 16-day composite vegetation index obtained from NASA's Moderate Resolution Imaging Spectroradiometer (MODIS) at 1 km resolution. The map illustrates the relative amount of vegetation."
+    }
+}
+
+// GLOBAL VARIABLES
 let layer;
 let s;
 let controlLayers;
 let baseMaps = {}; // No basemaps for now in this project;
 let overlayMaps; // Added/removed dynamically when loading the maps
+let legend;
 
-let map = L.map("map", {zoomSnap: 0.5, zoomControl: false}).setView([38.5, -98.5], 8);;
+let currentDate = new Date();
+let controlDate;
+if(currentDate.getHours() < 8){
+    controlDate = new Date(currentDate.getTime() - 2*86400000);
+} else {
+    controlDate = new Date(currentDate.getTime() - 86400000);
+}
+let maxDate = controlDate; // This will only run on page load, so maxDate will not be updated on other calls.
+let minDate = new Date(controlDate.getTime() - 7*86400000); 
+let datePicker = document.getElementById("date-picker");
+let layerPicker = document.getElementById("map-layers");
+setControlDate(controlDate);
+
+function setControlDate(date){
+    let year = date.getFullYear().toString();
+    let month = (date.getMonth() + 1).toString();
+    let day = date.getDate().toString();
+    datePicker.value = year + '-' + month + '-' + day;
+    controlDate = date;
+}
+
+
+function dateToMapDate(date){
+    mapDate = date.getFullYear() + ('0' + (date.getMonth()+1)).slice(-2) + ('0' + date.getDate()).slice(-2)
+    return mapDate
+}
+
+let minusButton = document.getElementById('minus-date');
+minusButton.addEventListener('click', function(){
+    let existingDate = new Date(datePicker.value);
+    let controlDate = new Date( Math.max( existingDate.getTime() - 86400000 + existingDate.getTimezoneOffset()*60*1000, minDate.getTime() ) );
+    console.log(controlDate);
+    setControlDate(controlDate);
+    loadLayer(metaLayers[layerPicker.value], controlDate);
+})
+
+let plusButton = document.getElementById('plus-date');
+plusButton.addEventListener('click', function(){
+    let existingDate = new Date(datePicker.value);
+    controlDate = new Date( Math.min( existingDate.getTime() + 86400000 + existingDate.getTimezoneOffset()*60*1000, maxDate.getTime() ) );
+    console.log(controlDate);
+    setControlDate(controlDate);
+    loadLayer(metaLayers[layerPicker.value], controlDate);
+})
+
+layerPicker.addEventListener('change', function(){loadLayer(metaLayers[layerPicker.value], controlDate)}, false);
+
+// LEAFLET variables
+let map = L.map("map", {zoomSnap: 0.5, zoomControl: false}).setView([38.5, -98.5], 8);
 new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
-
-
-
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
-let mapUrl = 'maps/evi2_16_day_20201020.tif'
-mapName = 'Storage'
-mapUnits = 'mm'
-mapRange = [0,1];
-mapPalette = 'Spectral';
+let ksCountiesLayer = L.geoJson(kscounties,{
+    style: defaultStyle,
+    onEachFeature: onEachFeature
+}).addTo(map);
 
-fetch(mapUrl).then(r => r.arrayBuffer()).then(function(buffer) {
-    s = L.ScalarField.fromGeoTIFF(buffer);
-    if (map.hasLayer(layer)){
-        map.removeLayer(layer); // Remove existing map
-        controlLayers.remove(); // Remove existing control layers
+map.fitBounds(ksCountiesLayer.getBounds());
+
+
+var info = L.control();
+info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'county-name'); // create a div with a class "info"
+    this.update();
+    return this._div;
+};
+
+info.update = function (properties) {
+    this._div.innerHTML = (properties ?
+        '<b>County: ' + properties.NAME + '</b><br/>'
+        : 'Hover over a county');
+};
+
+info.addTo(map);
+
+
+loadLayer(metaLayers[layerPicker.value], controlDate)
+
+function defaultStyle(feature) {
+    return {
+        fillColor: 'white',
+        fillOpacity: 0.1,
+        weight: 1,
+        opacity: 1,
+        color: '#ff1493'
+    };
+}
+
+function highlightFeature(e) {
+    var layer = e.target;
+
+    layer.setStyle({
+        fillColor: 'white',
+        fillOpacity: 0.2,
+        weight: 3,
+        color: '#ff1493',
+        dashArray: '5'
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
     }
-    layer = L.canvasLayer.scalarField(s,{
-                                    color: chroma.scale(mapPalette).domain(mapRange).classes(10),
-                                    opacity: 1,
-                                    setZIndex: 1,
-                                    inFilter: (v) => v < 255
-                                    }).addTo(map); // Add new map
+
+    info.update(layer.feature.properties);
+}
+
+function resetHighlight(e) {
+    ksCountiesLayer.resetStyle(e.target);
+    info.update();
+}
+
+function onEachFeature(feature, layer) {
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+    });
+}
+
+function loadLayer(metadata,date){
+    let fileDate = date.getFullYear() + ('0' + (date.getMonth()+1)).slice(-2) + ('0' + date.getDate()).slice(-2); 
+    mapUrl = metadata.url + metadata.filename + fileDate + metadata.extension;
+    fetch(mapUrl).then(r => r.arrayBuffer()).then(function(buffer) {
+        s = L.ScalarField.fromGeoTIFF(buffer);
+        if (map.hasLayer(layer)){
+            map.removeLayer(layer); // Remove existing map
+            controlLayers.remove(); // Remove existing control layers
+        }
+        layer = L.canvasLayer.scalarField(s,{
+                                        color: chroma.scale(metadata.palette).domain(metadata.range).classes(10),
+                                        opacity: 1,
+                                        setZIndex: 1,
+                                        inFilter: (v) => v < 255
+                                        }).addTo(map); // Add new map
+
+        layer.on("click", function(e) {
+            if (e.value !== null) {
+                let v = e.value.toFixed(1);
+                let html = '<span> <b>Latitude</b>: ' + e.latlng.lat.toFixed(5) + '</span> <br/>';
+                html += '<span> <b>Longitude</b>: ' + e.latlng.lng.toFixed(5) + '</span> <br/>';
+                html += '<span> <b>' + metadata.name + '</b>: ' + v + ' ' + metadata.units + '</span> <br/>';
+                popup = L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent(html)
+                    .openOn(map);
+            }
+        });
+
+        if(legend !== undefined){legend.remove()}
+        //legend.remove()
+        legend = L.control.colorBar(chroma.scale(metadata.palette).domain(metadata.range), metadata.range, {
+            title: metadata.name + ' (' + metadata.units + `)           Soil Water Processes Lab ` + controlDate.toLocaleDateString(),
+            units: metadata.units,
+            steps: 50,
+            decimals: 1,
+            width: 500,
+            height: 10,
+            position: 'bottomleft',
+            background: 'white',
+            textColor: 'black',
+            textLabels: metadata.textLabels,
+            labels: metadata.positionLabels,
+            labelFontSize: 12
+        })
+
+
+
+        // Control layers
+        overlayMaps = {
+            "Counties": ksCountiesLayer,
+            "Current map": layer
+        };
+        
+        // Restore control layers
+        controlLayers = L.control.layers(baseMaps, overlayMaps);
+        controlLayers.addTo(map);
+        document.getElementById("map-description").innerText = metadata.description;
+        legend.addTo(map);
+    });
     
-    // Restore control layers
-    controlLayers = L.control.layers(baseMaps, overlayMaps);
-    controlLayers.addTo(map);
-});
+}
 
-legendLabels(mapName,mapUnits, mapPalette, 10, mapRange[0], mapRange[1])
-
-
-function legendLabels(title,units,palette,N,minRange,maxRange){
+function createLegend(title,units,palette,N,minRange,maxRange){
     let interval = (maxRange - minRange)/N;
     let paletterRange = chroma.scale(palette).colors(N);
-    let htmlLegend = '';
+    let htmlLegend = '<div style="font-size:1.2rem; font-weight:bold;">' + title + ' (' + units + ')' + '</div>';
+
+    for(let i=0; i<N; i++){
+        htmlLegend += '<div style=" width:10px;height:10px; background-color:' + paletterRange[i] + ';"></div>';
+    }
 
     for(let i=0; i<N; i++){
         let a = minRange + i * interval;
@@ -57,10 +238,10 @@ function legendLabels(title,units,palette,N,minRange,maxRange){
             a = a.toFixed(0);
             b = b.toFixed(0);
         }
-        htmlLegend += '<i style="background-color:' + paletterRange[i] + ';  height: 10px; width:100px">'+ a + '-' + b + '</i>' 
+        htmlLegend += '<div style="font-size:1rem; text-align:left;">' + a + '-' + b + '</div>'
     }
-    document.getElementById("legend-labels").innerHTML = htmlLegend;
-    console.log(htmlLegend)
-    document.getElementById("legend-title").innerHTML = title + ' (' + units + ')';
+    htmlLegend += '<div style="grid-row=4; grid-column:1/11; padding-top:5px;">Map generated by the Soil Water Processes Lab - Kansas State University. Date: ' + new Date().toLocaleDateString() + '</div>';
+    document.getElementById("map-legend").innerHTML = htmlLegend;
 }
+
 

@@ -299,25 +299,5 @@ function useTemplate(templateId, appendId) {
     mapDescription.appendChild(clon);
 }
 
-function legendLabels(title,units,palette,N,minRange,maxRange){
-    let interval = (maxRange - minRange)/N;
-    let paletterRange = chroma.scale(palette).colors(N);
-    let htmlLegend = '';
 
-    for(let i=0; i<N; i++){
-        let a = minRange + i * interval;
-        let b = a + interval;
-
-        if(Math.abs(maxRange-minRange) < N){
-            a = a.toFixed(1);
-            b = b.toFixed(1);
-        } else {
-            a = a.toFixed(0);
-            b = b.toFixed(0);
-        }
-        htmlLegend += "<li><span style='background:" + paletterRange[i] + ";'></span>" + a + " - " + b + "</li>"
-    }
-    document.getElementById("legend-labels").innerHTML = htmlLegend;
-    document.getElementById("legend-title").innerHTML = title + ' (' + units + ')';
-}
 
