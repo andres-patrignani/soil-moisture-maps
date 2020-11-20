@@ -71,7 +71,7 @@ function formatDateSlider(dateInMilli) {
 // let maxDate = controlDate; // This will only run on page load, so maxDate will not be updated on other calls.
 // let minDate = new Date(controlDate.getTime() - 7*86400000); 
 // let datePicker = document.getElementById("date-picker");
-// let layerPicker = document.getElementById("map-layers");
+let layerPicker = document.getElementById("map-layers");
 // setControlDate(controlDate);
 
 
