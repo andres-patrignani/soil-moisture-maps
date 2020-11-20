@@ -33,23 +33,22 @@ let baseMaps = {}; // No basemaps for now in this project;
 let overlayMaps; // Added/removed dynamically when loading the maps
 let legend;
 
-let maxDate = new Date().getTime();
-let minDate = maxDate - 7*86400000; 
+let maxDate = new Date();
+let minDate = maxDate.getTime() - 7*86400000; 
+let controlDate = maxDate;
 
 
 // Slider planting and forecasting date
 var dateSlider = document.getElementById('dateSlider');
 let dateSliderValue = document.getElementById('dateSliderValue');
-noUiSlider.create(dateSlider, { connect: true, range:{min: minDate, max: maxDate}, step: 86400000, start: [maxDate] });
+noUiSlider.create(dateSlider, { connect: true, range:{min: minDate, max: maxDate.getTime()}, step: 86400000, start: [maxDate.getTime()] });
 dateSlider.noUiSlider.on('update', function (values, handle) { 
     if(handle == 0){ 
         dateSliderValue.innerHTML = 'Date: ' + formatDateSlider(parseInt(values[handle]));
+        controlDate = new Date(parseInt( dateSlider.noUiSlider.get()[0]))
     }
 });
 
-// Update management slider with observations boundaries
-//dateSlider.noUiSlider.updateOptions( {range: {'min': startDate, 'max': endDate} }); // Update the range of the date slider       
-//dateSlider.noUiSlider.set([startDate,forecastDate]); // Set the date slider using the first and last dates of the observations dataset
 
 function formatDateSlider(dateInMilli) {
     // Input date must be in milliseconds
@@ -57,49 +56,18 @@ function formatDateSlider(dateInMilli) {
     let year = date.getFullYear().toString();
     let month  = date.getMonth();
     let day =  date.getDate().toString();
-    let monthShortNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    let monthShortNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     return day + '-' + monthShortNames[month] + '-' + year;
   }
 
-// let controlDate;
-// if(currentDate.getHours() < 8){
-//     controlDate = new Date(currentDate.getTime() - 2*86400000);
-// } else {
-//     controlDate = new Date(currentDate.getTime() - 86400000);
-// }
 
-// let maxDate = controlDate; // This will only run on page load, so maxDate will not be updated on other calls.
-// let minDate = new Date(controlDate.getTime() - 7*86400000); 
-// let datePicker = document.getElementById("date-picker");
 let layerPicker = document.getElementById("map-layers");
-// setControlDate(controlDate);
-
-
-// function setControlDate(date){
-//     let year = date.getFullYear().toString();
-//     let month = (date.getMonth() + 1).toString();
-//     let day = date.getDate().toString();
-//     datePicker.value = year + '-' + month + '-' + day;
-//     controlDate = date;
-// }
 
 
 function dateToMapDate(date){
     mapDate = date.getFullYear() + ('0' + (date.getMonth()+1)).slice(-2) + ('0' + date.getDate()).slice(-2)
     return mapDate
 }
-
-
-
-
-// let plusButton = document.getElementById('plus-date');
-// plusButton.addEventListener('click', function(){
-//     let existingDate = new Date(datePicker.value);
-//     controlDate = new Date( Math.min( existingDate.getTime() + 86400000 + existingDate.getTimezoneOffset()*60*1000, maxDate.getTime() ) );
-//     console.log(controlDate);
-//     setControlDate(controlDate);
-//     loadLayer(metaLayers[layerPicker.value], controlDate);
-// })
 
 layerPicker.addEventListener('change', function(){loadLayer(metaLayers[layerPicker.value], controlDate)}, false);
 
