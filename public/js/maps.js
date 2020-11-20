@@ -45,7 +45,7 @@ noUiSlider.create(dateSlider, { connect: true, range:{min: minDate, max: maxDate
 dateSlider.noUiSlider.on('update', function (values, handle) { 
     if(handle == 0){ 
         dateSliderValue.innerHTML = 'Date: ' + formatDateSlider(parseInt(values[handle]));
-        controlDate = new Date(parseInt( dateSlider.noUiSlider.get()[0]))
+        controlDate = new Date(parseInt( dateSlider.noUiSlider.get()))
     }
 });
 
